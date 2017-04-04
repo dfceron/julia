@@ -73,9 +73,9 @@ function validate(agent::AbstractRLAgent)
     try agent.policy catch e 
         if (isa(e, UndefRefError) || isa(e, ErrorException)) info("Field policy::Function (s) -> (a) missing from type") end
     end 
-    # try agent.state catch e 
-    #    if (isa(e, UndefRefError) || isa(e, ErrorException)) info("Field state::Any missing from type") end 
-    # end
+    try agent.state catch e 
+       if (isa(e, UndefRefError) || isa(e, ErrorException)) info("Field state::Any missing from type") end 
+     end
 end
 export validate
 
@@ -114,7 +114,7 @@ function episode!(agent::AbstractRLAgent, env::AbstractRLEnv; max_steps = 10000,
         if verbose print_backup(step, state, reward, action) end
         step += 1
     end
-    if step == max_steps warn("max_steps reached") end
+    # if step == max_steps warn("max_steps reached") end
     return states, rewards, actions
 end
 function episode!(agent::AbstractRLAgent, env::AbstractRLEnv, action::Any; max_steps = 10000, verbose = false)
@@ -128,7 +128,7 @@ function episode!(agent::AbstractRLAgent, env::AbstractRLEnv, action::Any; max_s
         if verbose print_backup(step, state, reward, action) end
         step += 1
     end
-    if step == max_steps warn("max_steps reached") end
+    # if step == max_steps warn("max_steps reached") end
     return states, rewards, actions
 end
 function episode(agent::AbstractRLAgent, env::AbstractRLEnv, state::Any; max_steps = 10000, verbose = false)
@@ -140,7 +140,7 @@ function episode(agent::AbstractRLAgent, env::AbstractRLEnv, state::Any; max_ste
         if verbose print_backup(step, state, reward, action) end
         step += 1
     end
-    if step == max_steps warn("max_steps reached") end
+    # if step == max_steps warn("max_steps reached") end
     return states, rewards, actions
 end
 function episode(agent::AbstractRLAgent, env::AbstractRLEnv, state::Any, action::Any; max_steps = 10000, verbose = false)
@@ -154,7 +154,7 @@ function episode(agent::AbstractRLAgent, env::AbstractRLEnv, state::Any, action:
         if verbose print_backup(step, state, reward, action) end
         step += 1
     end
-    if step == max_steps warn("max_steps reached") end
+    # if step == max_steps warn("max_steps reached") end
     return states, rewards, actions
 end
 export episode!, episode

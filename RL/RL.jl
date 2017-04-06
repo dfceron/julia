@@ -1,6 +1,6 @@
 module RL
 
-import PixelArts
+using PixelArts
 
 abstract type AbstractRLEnv end
 abstract type AbstractRLAgent end
@@ -12,19 +12,20 @@ type RLEnv <: AbstractRLEnv
     actions::Function # (state) -> (Actions available at s)
     step::Function # (state, action) -> (new_state, reward)
     task_end::Function # (state) -> (true/false) # controversial, should I use the end_states?....
+    begin_states::Any # used as default initial state
     # additional constructors, task_end defaults to false function if not provided
-    RLEnv() = new()
-    RLEnv(states, actions, step) = new(states, actions, step, s -> false)
-    RLEnv(states, actions, step, task_end) = new(states, actions, step, task_end)
+    #RLEnv() = new()
+    #RLEnv(states, actions, step) = new(states, actions, step, s -> false)
+    #RLEnv(states, actions, step, task_end) = new(states, actions, step, task_end)
 end
 export RLEnv
 
 # Accesors 
-states(env::AbstractRLEnv) = env.states
-actions(env::AbstractRLEnv) = env.actions
-step(env::AbstractRLEnv) = env.step
-task_end(env::AbstractRLEnv) = env.task_end
-export states, actions, step_fun, task_end
+#states(env::AbstractRLEnv) = env.states
+#actions(env::AbstractRLEnv) = env.actions
+#step(env::AbstractRLEnv) = env.step
+#task_end(env::AbstractRLEnv) = env.task_end
+#export states, actions, step_fun, task_end
 
 # Setters
 #set_actions(env::RLEnv, actions::Function) = (agent.actions = actions)
@@ -37,16 +38,16 @@ type RLAgent <: AbstractRLAgent
     policy::Function # (state) -> (action)
     state::Any
     # constructor if state is missing
-    RLAgent() = new()
-    RLAgent(policy) = new(policy)
-    RLAgent(policy, state) = new(policy, state)
+    # RLAgent() = new()
+    # RLAgent(policy) = new(policy)
+    # LAgent(policy, state) = new(policy, state)
 end
 export RLAgent
 
 # Accesors
-state(agent::AbstractRLAgent) = agent.state
-policy(agent::AbstractRLAgent) = agent.policy
-export state, policy
+#state(agent::AbstractRLAgent) = agent.state
+#policy(agent::AbstractRLAgent) = agent.policy
+#export state, policy
 
 # Setters
 #set_state(agent::AbstractRLAgent) = (agent.state = state)
@@ -56,26 +57,26 @@ export state, policy
 # Class Validation ==================================================================
 function validate(env::AbstractRLEnv)
     try env.states catch e 
-        if (isa(e, UndefRefError) || isa(e, ErrorException)) info("Field states::Any missing") end 
+        (isa(e, UndefRefError) || isa(e, ErrorException)) && info("Field states::Any missing") 
     end
     try env.actions catch e 
-        if (isa(e, UndefRefError) || isa(e, ErrorException)) info("Field actions::Function (s) -> (A(s)) missing") end 
+        (isa(e, UndefRefError) || isa(e, ErrorException)) && info("Field actions::Function (s) -> (A(s)) missing") 
     end
     try env.step catch e 
-        if (isa(e, UndefRefError) || isa(e, ErrorException)) info("Field step::Function (s, a) -> (s', r) missing") end 
+        (isa(e, UndefRefError) || isa(e, ErrorException)) && info("Field step::Function (s, a) -> (s', r) missing") 
     end
     try env.task_end catch e
-        if (isa(e, UndefRefError) || isa(e, ErrorException)) info("Field task_end::Function missing, for non-episodic tasks use s -> false") end 
+        (isa(e, UndefRefError) || isa(e, ErrorException)) && info("Field task_end::Function missing, for non-episodic tasks use s -> false")
     end
 end
 
 function validate(agent::AbstractRLAgent)
     try agent.policy catch e 
-        if (isa(e, UndefRefError) || isa(e, ErrorException)) info("Field policy::Function (s) -> (a) missing from type") end
+       (isa(e, UndefRefError) || isa(e, ErrorException)) && info("Field policy::Function (s) -> (a) missing from type")
     end 
     try agent.state catch e 
-       if (isa(e, UndefRefError) || isa(e, ErrorException)) info("Field state::Any missing from type") end 
-     end
+       (isa(e, UndefRefError) || isa(e, ErrorException)) && info("Field state::Any missing from type")
+    end
 end
 export validate
 
@@ -159,10 +160,12 @@ function episode(agent::AbstractRLAgent, env::AbstractRLEnv, state::Any, action:
 end
 export episode!, episode
 
-# Additional methods
+function reset!(agent::AbstractRLAgent, env::AbstractRLEnv)
+    agent.state = rand(env.begin_states)
+end
 
-# Todo First Visits
 
+# TD Learning
 
 # Environments ==============================================
 

@@ -163,6 +163,7 @@ export episode!, episode
 function reset!(agent::AbstractRLAgent, env::AbstractRLEnv)
     agent.state = rand(env.begin_states)
 end
+export reset!
 
 
 # TD Learning

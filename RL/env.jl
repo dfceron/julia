@@ -95,12 +95,26 @@ function animate(c::circuit, canvas_id::String, states; speed = 0.1, max_time = 
         i += 1
     end
 end
-    
+
+function greedy_arrow_plot(c::circuit, greedy)
+    # assuming greedy is a set of greedy actions
+    rotation = Dict("up" => 90, "down" => 270, "right" => 0, "left" => 180)
+    s *= ""
+    for s in c.states 
+        for a in greedy[s]
+            s *= add_pixel_arrow("""arrow$(join(s,"_"))""", rtcanvas, s..., rotation[a], disp = false) 
+        end 
+    end
+    jsdisp(s)
+end
+export greedy_arrow_plot
+
 type grid_adventure <: AbstractRLEnv
     states
     actions
     step
     task_end
+    begin_states
     exits
     blocks
     coins
@@ -124,6 +138,7 @@ function rand_grid_adventure(height::Int, width::Int; nexits = 1, nblocks = 0, n
     blocks = nblocks > 0 ? grid[idx[(nexits + 1):(nexits + nblocks)]] : []
     coins = ncoins > 0 ? grid[idx[(nexits + nblocks + 1):(nexits + nblocks + ncoins)]] : []
     bombs = nbombs > 0 ? grid[idx[((nexits + nblocks + ncoins + 1):tot)]] : []
+    begin_states = [[[1,1], [1 for x in coins], [1 for x in bombs]]]
     active_coins_states = (ncoins <= 0) ? [] : expand_grid([1, 0], ncoins)
     active_bombs_states = (nbombs <= 0) ? [] : expand_grid([1, 0], nbombs)
     states = [[x, ((size(y,1)>1)?y:[y]), ((size(z,1)>1)?z:[z])] for x in grid for y in active_coins_states for z in active_bombs_states]
@@ -155,7 +170,7 @@ function rand_grid_adventure(height::Int, width::Int; nexits = 1, nblocks = 0, n
         end
         return new_state, reward
     end
-    return grid_adventure(states, actions, step, task_end, exits, blocks, coins, bombs, array)
+    return grid_adventure(states, actions, step, task_end, begin_states, exits, blocks, coins, bombs, array)
 end
 export rand_grid_adventure
     
@@ -224,10 +239,10 @@ function animate(g::grid_adventure, canvas_id::String, states; speed = 0.1, max_
     end
 end
 
-function init_state(g::grid_adventure, pos = [1, 1])
-    return [pos, [true for x in g.coins], [true for x in g.bombs]] 
-end
-export init_state
+#function init_state(g::grid_adventure, pos = [1, 1])
+##    return [pos, [true for x in g.coins], [true for x in g.bombs]] 
+#end
+#export init_state
 
 
 function get_env(env_id::String)
